@@ -1,0 +1,16 @@
+[
+    {
+      "id": 1,
+      "name": "Test project",
+      "hasLiveDeployment": false,
+      "hasPendingDeployment": true,
+      "url": null
+    },
+    {
+      "id": 2,
+      "name": "Second project",
+      "hasLiveDeployment": true,
+      "hasPendingDeployment": false,
+      "url": "test_url.com"
+    }
+  ]

@@ -1,0 +1,16 @@
+{
+  "extends": "@tsconfig/node16",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "es2022",
+    "lib": ["ES2022"],
+    "composite": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "resolveJsonModule": true,
+  },
+  "include": ["src/", "knexfile.ts", "src/**/*.json"],
+  "exclude": ["**/tests/", "**/__tests__/", "**/mocks/", "**/__mocks__/", "**/*.test.ts"]
+}
