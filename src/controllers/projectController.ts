@@ -21,8 +21,9 @@ const getProjects = async (ctx: ParameterizedContext) => {
   }
   const offset = page ? Number(page) * 8 : 0;
   const limit = 8;
-  ctx.body = ctx.db.getPaginatedProjectsByUserId(userId, offset, limit);
+  ctx.body = await ctx.db.getPaginatedProjectsByUserId(userId, offset, limit);
   ctx.status = RESPONSE.OK.STATUS;
+  return ctx;
 };
 
 const getProjectById = async (ctx: ParameterizedContext) => {
@@ -34,17 +35,17 @@ const getProjectById = async (ctx: ParameterizedContext) => {
       message: `project ${RESPONSE.NOT_FOUND.MESSAGE}`,
     };
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
-    return;
+    return ctx;
   }
   const verifiedUser = await verifyUser(ctx, userId);
   if (!verifiedUser) {
     ctx.body = { name: RESPONSE.NOT_FOUND.NAME, message: `user ${RESPONSE.NOT_FOUND.MESSAGE}` };
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
-    return;
+    return ctx;
   }
-
-  ctx.body = ctx.db.getProjectById(projectId);
+  ctx.body = await ctx.db.getProjectById(projectId);
   ctx.status = RESPONSE.OK.STATUS;
+  return ctx;
 };
 
 const createDeployment = async (ctx: ParameterizedContext) => {
@@ -56,13 +57,13 @@ const createDeployment = async (ctx: ParameterizedContext) => {
       message: `project ${RESPONSE.NOT_FOUND.MESSAGE}`,
     };
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
-    return;
+    return ctx;
   }
   const verifiedUser = await verifyUser(ctx, userId);
   if (!verifiedUser) {
     ctx.body = { name: RESPONSE.NOT_FOUND.NAME, message: `user ${RESPONSE.NOT_FOUND.MESSAGE}` };
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
-    return;
+    return ctx;
   }
   const data: DeploymentRow = {
     project_id: projectId,
@@ -70,8 +71,9 @@ const createDeployment = async (ctx: ParameterizedContext) => {
     deployed_in: 0,
     created_at: moment().utc().format(),
   };
-  ctx.body = ctx.db.createDeployment(data);
+  ctx.body = await ctx.db.createDeployment(data);
   ctx.status = RESPONSE.CREATED.STATUS;
+  return ctx;
 };
 
 const projectController = {

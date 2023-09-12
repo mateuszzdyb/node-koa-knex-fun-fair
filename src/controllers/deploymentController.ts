@@ -34,7 +34,7 @@ const getDeployments = async (ctx: ParameterizedContext) => {
   validatePagination(page);
   const offset = page ? Number(page) * 8 : 0;
   const limit = 8;
-  ctx.body = ctx.db.getPaginatedDeploymentsByProjectId(projectId, offset, limit);
+  ctx.body = await ctx.db.getPaginatedDeploymentsByProjectId(projectId, offset, limit);
   ctx.status = RESPONSE.OK.STATUS;
 };
 
@@ -64,7 +64,7 @@ const getDeploymentById = async (ctx: ParameterizedContext) => {
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
     return;
   }
-  ctx.body = ctx.db.getPaginatedDeploymentById(deploymentId);
+  ctx.body = await ctx.db.getPaginatedDeploymentById(deploymentId);
   ctx.status = RESPONSE.OK.STATUS;
 };
 

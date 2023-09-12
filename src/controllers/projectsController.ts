@@ -9,8 +9,9 @@ const getProjects = async (ctx: ParameterizedContext) => {
   validatePagination(page);
   const offset = page ? Number(page) * 8 : 0;
   const limit = 8;
-  ctx.body = ctx.db.getPaginatedProjects(offset, limit);
+  ctx.body = await ctx.db.getPaginatedProjects(offset, limit);
   ctx.status = RESPONSE.OK.STATUS;
+  return ctx;
 };
 
 const projectController = {
