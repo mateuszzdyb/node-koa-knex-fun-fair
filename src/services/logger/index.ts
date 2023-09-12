@@ -1,10 +1,17 @@
 import winston, { Logger } from 'winston';
 
+const { createLogger, format, transports } = winston;
+
 export default function logger(level: string): Logger {
-  const wlogger = winston.createLogger({
+  const myFormat = format.printf((log) =>
+    format
+      .colorize()
+      .colorize(log.level, `${log.timestamp} - ${log.label} - ${log.level}: ${log.message}`)
+  );
+  const wlogger = createLogger({
+    format: format.combine(format.label({ label: '[server]' }), format.timestamp(), myFormat),
     level,
-    format: winston.format.json(),
-    transports: [new winston.transports.Console()],
+    transports: [new transports.Console()],
   });
 
   return wlogger;
