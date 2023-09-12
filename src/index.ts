@@ -1,5 +1,6 @@
 import httpLoader from './interface/http';
 import serverConfig from './config/server';
+import PsqlStore from './services/db-stores/psqlStore';
 
 type ListenConfig = {
   port: number;
@@ -9,6 +10,9 @@ type ListenConfig = {
 const start = async (config: ListenConfig): Promise<void> => {
   const app = await httpLoader();
   const server = app.listen(config.port);
+
+  // Adding to context
+  app.context.db = new PsqlStore();
 
   server.on('listening', () => {
     console.info(`Server started and is listening on ${config.hostname}:${config.port}`);

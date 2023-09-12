@@ -9,6 +9,5 @@ COPY ./src ./src
 
 # install packages
 RUN npm install
-# RUN npm run migrate
 
 CMD npm run develop

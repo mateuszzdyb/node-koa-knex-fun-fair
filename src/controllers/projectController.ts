@@ -8,13 +8,12 @@ import { RESPONSE } from '../constants/response';
 import { DEPLOYMENT_STATUS } from '../constants/tables';
 
 import { DeploymentRow } from '../types/knex-types';
-import psqlStore from '../services/psqlStore';
 
 const getProjects = async (ctx: ParameterizedContext) => {
   const { page } = ctx.query;
   const { userId } = ctx.params;
   validatePagination(page);
-  const verifiedUser = await verifyUser(userId);
+  const verifiedUser = await verifyUser(ctx, userId);
   if (!verifiedUser) {
     ctx.body = { name: RESPONSE.NOT_FOUND.NAME, message: `user ${RESPONSE.NOT_FOUND.MESSAGE}` };
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
@@ -22,13 +21,13 @@ const getProjects = async (ctx: ParameterizedContext) => {
   }
   const offset = page ? Number(page) * 8 : 0;
   const limit = 8;
-  ctx.body = await psqlStore.getPaginatedProjectsByUserId(userId, offset, limit);
+  ctx.body = ctx.db.getPaginatedProjectsByUserId(userId, offset, limit);
   ctx.status = RESPONSE.OK.STATUS;
 };
 
 const getProjectById = async (ctx: ParameterizedContext) => {
   const { projectId, userId } = ctx.params;
-  const verifiedProject = await verifyProject(projectId);
+  const verifiedProject = await verifyProject(ctx, projectId);
   if (!verifiedProject) {
     ctx.body = {
       name: RESPONSE.NOT_FOUND.NAME,
@@ -37,20 +36,20 @@ const getProjectById = async (ctx: ParameterizedContext) => {
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
     return;
   }
-  const verifiedUser = await verifyUser(userId);
+  const verifiedUser = await verifyUser(ctx, userId);
   if (!verifiedUser) {
     ctx.body = { name: RESPONSE.NOT_FOUND.NAME, message: `user ${RESPONSE.NOT_FOUND.MESSAGE}` };
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
     return;
   }
 
-  ctx.body = await psqlStore.getProjectById(projectId);
+  ctx.body = ctx.db.getProjectById(projectId);
   ctx.status = RESPONSE.OK.STATUS;
 };
 
 const createDeployment = async (ctx: ParameterizedContext) => {
   const { projectId, userId } = ctx.params;
-  const verifiedProject = await verifyProject(projectId);
+  const verifiedProject = await verifyProject(ctx, projectId);
   if (!verifiedProject) {
     ctx.body = {
       name: RESPONSE.NOT_FOUND.NAME,
@@ -59,7 +58,7 @@ const createDeployment = async (ctx: ParameterizedContext) => {
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
     return;
   }
-  const verifiedUser = await verifyUser(userId);
+  const verifiedUser = await verifyUser(ctx, userId);
   if (!verifiedUser) {
     ctx.body = { name: RESPONSE.NOT_FOUND.NAME, message: `user ${RESPONSE.NOT_FOUND.MESSAGE}` };
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
@@ -71,7 +70,7 @@ const createDeployment = async (ctx: ParameterizedContext) => {
     deployed_in: 0,
     created_at: moment().utc().format(),
   };
-  ctx.body = await psqlStore.createDeployment(data);
+  ctx.body = ctx.db.createDeployment(data);
   ctx.status = RESPONSE.CREATED.STATUS;
 };
 

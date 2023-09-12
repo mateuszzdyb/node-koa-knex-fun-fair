@@ -12,18 +12,17 @@ import { DEPLOYMENT_STATUS } from '../constants/tables';
 
 import { EventObj } from '../types/events-types';
 import { KnexUpdateProjectDeploymentResponse } from '../types/knex-types';
-import psqlStore from '../services/psqlStore';
 
 const getDeployments = async (ctx: ParameterizedContext) => {
   const { page } = ctx.query;
   const { projectId, userId } = ctx.params;
-  const verifiedUser = await verifyUser(userId);
+  const verifiedUser = await verifyUser(ctx, userId);
   if (!verifiedUser) {
     ctx.body = { name: RESPONSE.NOT_FOUND.NAME, message: `user ${RESPONSE.NOT_FOUND.MESSAGE}` };
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
     return;
   }
-  const verifiedProject = await verifyProject(projectId);
+  const verifiedProject = await verifyProject(ctx, projectId);
   if (!verifiedProject) {
     ctx.body = {
       name: RESPONSE.NOT_FOUND.NAME,
@@ -35,13 +34,13 @@ const getDeployments = async (ctx: ParameterizedContext) => {
   validatePagination(page);
   const offset = page ? Number(page) * 8 : 0;
   const limit = 8;
-  ctx.body = await psqlStore.getPaginatedDeploymentsByProjectId(projectId, offset, limit);
+  ctx.body = ctx.db.getPaginatedDeploymentsByProjectId(projectId, offset, limit);
   ctx.status = RESPONSE.OK.STATUS;
 };
 
 const getDeploymentById = async (ctx: ParameterizedContext) => {
   const { deploymentId, projectId, userId } = ctx.params;
-  const verifiedDeployment = await verifyDeployment(deploymentId);
+  const verifiedDeployment = await verifyDeployment(ctx, deploymentId);
   if (!verifiedDeployment) {
     ctx.body = {
       name: RESPONSE.NOT_FOUND.NAME,
@@ -50,7 +49,7 @@ const getDeploymentById = async (ctx: ParameterizedContext) => {
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
     return;
   }
-  const verifiedProject = await verifyProject(projectId);
+  const verifiedProject = await verifyProject(ctx, projectId);
   if (!verifiedProject) {
     ctx.body = {
       name: RESPONSE.NOT_FOUND.NAME,
@@ -59,13 +58,13 @@ const getDeploymentById = async (ctx: ParameterizedContext) => {
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
     return;
   }
-  const verifiedUser = await verifyUser(userId);
+  const verifiedUser = await verifyUser(ctx, userId);
   if (!verifiedUser) {
     ctx.body = { name: RESPONSE.NOT_FOUND.NAME, message: `user ${RESPONSE.NOT_FOUND.MESSAGE}` };
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
     return;
   }
-  ctx.body = await psqlStore.getPaginatedDeploymentById(deploymentId);
+  ctx.body = ctx.db.getPaginatedDeploymentById(deploymentId);
   ctx.status = RESPONSE.OK.STATUS;
 };
 
@@ -81,13 +80,13 @@ const putDeploymentById = async (ctx: ParameterizedContext) => {
     ctx.status = RESPONSE.BAD_REQUEST.STATUS;
     return;
   }
-  const verifiedUser = await verifyUser(userId);
+  const verifiedUser = await verifyUser(ctx, userId);
   if (!verifiedUser) {
     ctx.body = { name: RESPONSE.NOT_FOUND.NAME, message: `user ${RESPONSE.NOT_FOUND.MESSAGE}` };
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
     return;
   }
-  const verifiedProject = await verifyProject(projectId);
+  const verifiedProject = await verifyProject(ctx, projectId);
   if (!verifiedProject) {
     ctx.body = {
       name: RESPONSE.NOT_FOUND.NAME,
@@ -96,7 +95,7 @@ const putDeploymentById = async (ctx: ParameterizedContext) => {
     ctx.status = RESPONSE.NOT_FOUND.STATUS;
     return;
   }
-  const verifiedDeployment = await verifyDeployment(deploymentId);
+  const verifiedDeployment = await verifyDeployment(ctx, deploymentId);
   if (!verifiedDeployment) {
     ctx.body = {
       name: RESPONSE.NOT_FOUND.NAME,
@@ -107,20 +106,20 @@ const putDeploymentById = async (ctx: ParameterizedContext) => {
   }
 
   if (deploymentStatus === DEPLOYMENT_STATUS.DONE) {
-    const knexRes: KnexUpdateProjectDeploymentResponse = await psqlStore.updateDeploymentById(
+    const knexRes: KnexUpdateProjectDeploymentResponse = await ctx.db.updateDeploymentById(
       deploymentId
     );
     if (!knexRes.deployedIn) {
       const oldDate = moment.utc(knexRes.createdAt);
       const diff = Math.floor(moment.duration(moment().utc().diff(oldDate)).asSeconds());
-      await psqlStore.updateDeployedInById(deploymentId, diff);
+      await ctx.db.updateDeployedInById(deploymentId, diff);
     }
     if (!knexRes.url) {
       const randomUrl = `http://random-link${uuidv4()}.com`;
-      await psqlStore.updateUrlById(projectId, randomUrl);
+      await ctx.db.updateUrlById(projectId, randomUrl);
     }
   }
-  const resp = await psqlStore.updateDeploymentStatusById(deploymentId, deploymentStatus);
+  const resp = await ctx.db.updateDeploymentStatusById(deploymentId, deploymentStatus);
 
   const eventObj: EventObj = {
     deploymentId,
