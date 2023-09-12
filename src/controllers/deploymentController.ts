@@ -128,7 +128,7 @@ const putDeploymentById = async (ctx: ParameterizedContext) => {
     status: deploymentStatus,
   };
 
-  eventManager.send(eventObj);
+  eventManager.send(ctx, eventObj);
   ctx.body = resp;
   ctx.status = RESPONSE.OK.STATUS;
 };

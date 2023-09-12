@@ -4,6 +4,7 @@ import DeploymentStatus from '../../types/deployment-types';
 import { DeploymentRow } from '../../types/knex-types';
 import { Store } from './storeInterface';
 
+// Use like singleton
 class PsqlStore implements Store {
   createDeployment = async (data: DeploymentRow) =>
     knex<DeploymentRow>(TABLE.DEPLOYMENT.NAME)
