@@ -6,6 +6,20 @@ import { Store } from './storeInterface';
 
 // Use like singleton
 class PsqlStore implements Store {
+  // eslint-disable-next-line no-use-before-define
+  public static instance: PsqlStore;
+
+  private constructor() {
+    /* Do Nothing */
+  }
+
+  public static getInstance(): PsqlStore {
+    if (!PsqlStore.instance) {
+      PsqlStore.instance = new PsqlStore();
+    }
+    return PsqlStore.instance;
+  }
+
   createDeployment = async (data: DeploymentRow) =>
     knex<DeploymentRow>(TABLE.DEPLOYMENT.NAME)
       .insert(data)

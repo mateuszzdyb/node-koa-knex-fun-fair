@@ -13,7 +13,7 @@ const start = async (config: ListenConfig): Promise<void> => {
   const server = app.listen(config.port);
 
   // Adding to context
-  app.context.db = new PsqlStore();
+  app.context.db = PsqlStore.getInstance();
   app.context.logger = Logger(process.env.LOGGER || 'info');
 
   server.on('listening', () => {
